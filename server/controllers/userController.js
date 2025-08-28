@@ -71,7 +71,7 @@ export const getPublishedImages = async (req, res) => {
                 }
             },
             {
-                $projects: {
+                $project: {
                     _id: 0,
                     imageUrl: "$messages.content",
                     userName: "$userName"
