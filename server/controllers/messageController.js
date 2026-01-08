@@ -38,6 +38,13 @@ export const textMessageController = async (req, res) => {
         await User.updateOne({ _id: userId }, { $inc: { credits: -1 } })
 
     } catch (error) {
+        // Handle rate limiting errors
+        if (error.status === 429) {
+            return res.status(429).json({ 
+                success: false, 
+                message: "API rate limit exceeded. Please wait before trying again." 
+            })
+        }
         res.json({ success: false, message: error.message })
     }
 }
@@ -96,6 +103,13 @@ export const imageMessageController = async (req, res) => {
         await User.updateOne({ _id: userId }, { $inc: { credits: -2 } })
 
     } catch (error) {
+        // Handle rate limiting errors
+        if (error.status === 429 || error.response?.status === 429) {
+            return res.status(429).json({ 
+                success: false, 
+                message: "Image generation rate limit exceeded. Please wait before trying again." 
+            })
+        }
         res.json({ success: false, message: error.message })
     }
 }

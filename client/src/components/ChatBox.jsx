@@ -18,11 +18,12 @@ const ChatBox = () => {
   const [isPublished, setIsPublished] = useState(false)
 
   const onSubmit = async (e) => {
+    let promptCopy = '';
     try {
       e.preventDefault()
       if (!user) return toast('Login to send message')
       setLoading(true)
-      const promptCopy = prompt
+      promptCopy = prompt
       setPrompt('')
       setMessages(prev => [...prev, { role: 'user', content: prompt, timestamp: Date.now(), isImage: false }])
 
@@ -41,7 +42,18 @@ const ChatBox = () => {
         setPrompt(promptCopy)
       }
     } catch (error) {
-      toast.error(error.message || 'Something went wrong')
+      const status = error.response?.status;
+      const message = error.response?.data?.message;
+      
+      // Handle rate limit errors
+      if (status === 429) {
+        toast.error(message || 'Too many requests. Please wait a moment and try again.')
+        setMessages(prev => prev.slice(0, -1)) // Remove the user message that wasn't sent
+        setPrompt(promptCopy)
+      } else {
+        toast.error(error.message || 'Something went wrong')
+        setPrompt(promptCopy)
+      }
     } finally {
       setPrompt('')
       setLoading(false)
